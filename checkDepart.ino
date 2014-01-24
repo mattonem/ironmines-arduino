@@ -6,36 +6,51 @@
 #include <ros.h>
 #include <std_msgs/Bool.h>
 
+int clock = 0;
+
+//Ici on declare nos constante pour le programme
 const int startConnection = 2;
 int startConnectionState = LOW;
 
-
 ros::NodeHandle  nh;
 
-std_msgs::Bool bool_msg;
-ros::Publisher startTrigger("startTrigger", &bool_msg);
+//Ici on peut declarer de nouveau messages si besoin
+std_msgs::Bool bool_true;
+std_msgs::Bool bool_false;
 
-char hello[13] = "hello world!";
 
+//Ici on declare le topic publisher ou subscriber
+ros::Publisher started("startTrigger", &bool_false);
+
+//On peut ainsi prevoir le comportement de larduino sur un iteration
+//Chaque action a sa propre fonction
 void checkDepart()
 {
-  if (startConnectionState == LOW && digitalRead(startConnection) == HIGH) {
+  if(clock%10 != 0)
+    return;
+    
+  if (digitalRead(startConnection) == HIGH) {
     startConnectionState = HIGH;
-    bool_msg.data = true;
-    startTrigger.publish( &bool_msg );
+    started.publish( &bool_true );
   }
 }
+
 
 void setup()
 {
   nh.initNode();
-  nh.advertise(startTrigger);
+  //On doit declarer chaque publisher au pres de ROS
+  nh.advertise(started);
+  
+  //On initialise les messages
+  bool_true.data = true;
+  bool_false.data = false;
 }
 
 void loop()
 {
-  bool_msg.data = false;
+  clock ++;
   checkDepart();
   nh.spinOnce();
-  delay(100);
+  delay(1);
 }
