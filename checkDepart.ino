@@ -29,9 +29,13 @@ void checkDepart()
   if(clock%10 != 0)
     return;
     
-  if (digitalRead(startConnection) == HIGH) {
-    startConnectionState = HIGH;
-    started.publish( &bool_true );
+  if (digitalRead(startConnection) != startConnectionState) {
+    startConnectionState = digitalRead(startConnection);
+    if(startConnectionState == HIGH){
+      started.publish( &bool_true );
+    }else{
+      started.publish( &bool_false );
+    }
   }
 }
 
