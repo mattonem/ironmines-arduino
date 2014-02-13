@@ -10,7 +10,7 @@ int clock = 0;
 
 //Ici on declare nos constante pour le programme
 const int startConnection = 2;
-int startConnectionState = LOW;
+int startConnectionState = LOW; 
 
 ros::NodeHandle  nh;
 
@@ -26,8 +26,6 @@ ros::Publisher started("startTrigger", &bool_false);
 //Chaque action a sa propre fonction
 void checkDepart()
 {
-  if(clock%10 != 0)
-    return;
     
   if (digitalRead(startConnection) != startConnectionState) {
     startConnectionState = digitalRead(startConnection);
@@ -45,6 +43,8 @@ void setup()
   nh.initNode();
   //On doit declarer chaque publisher au pres de ROS
   nh.advertise(started);
+  
+  pinMode(startConnection, INPUT);
   
   //On initialise les messages
   bool_true.data = true;
