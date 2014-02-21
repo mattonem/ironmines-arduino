@@ -7,6 +7,7 @@ int clock = 0;
 
 //Ici on declare nos constante pour le programme
 const int startConnection = 8;
+const int canonConnection = 9;
 int startConnectionState = LOW; 
 //Les pins 2-7 sont pour les capteurs ultrason
 
@@ -25,10 +26,25 @@ ros::Publisher sonar1("sonnars/1", &aSonar);
 ros::Publisher sonar2("sonnars/2", &aSonar);
 ros::Publisher sonar3("sonnars/3", &aSonar);
 ros::Publisher sonar4("sonnars/4", &aSonar);
+
+void fire(const std_msgs::Bool& msg) 
+{
+  if(msg.data)
+  {
+      digitalWrite(canonConnection, HIGH);   // set the LED on
+      delay(1000);              // wait for a second
+      digitalWrite(canonConnection, LOW);    // set the LED off
+      delay(1000);
+  }
+}
+
+ros::Subscriber<std_msgs::Bool> canon("canonTrigger", fire);
 LinkedList<ros::Publisher* > sonars;
 
 //On peut ainsi prevoir le comportement de larduino sur un iteration
 //Chaque action a sa propre fonction
+
+
 void checkDepart()
 {
     
@@ -70,9 +86,6 @@ long readSonar(int pingPin)
 
 long microsecondsToMilimeters(long microseconds)
 {
-  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-  // The ping travels out and back, so to find the distance of the
-  // object we take half of the distance travelled.
   return microseconds * 10 / 29 / 2;
 }
 
@@ -83,6 +96,7 @@ void setup()
   nh.initNode();
   //On doit declarer chaque publisher au pres de ROS
   nh.advertise(started);
+  nh.subscribe(canon);
   sonars = LinkedList<ros::Publisher*>();
   
   sonars.add(&sonar0);
@@ -97,6 +111,7 @@ void setup()
   }
   
   pinMode(startConnection, INPUT);
+  pinMode(canonConnection, OUTPUT);
   
   //On initialise les messages
   aSonar.data = 0;
